@@ -1,21 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Zoo Ticket</title>
+  <meta charset="UTF-8" />
+  <title>🎟️ Zoo Ticket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .ticket { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
-    .qr { margin-top: 20px; }
-    .error { color: red; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffe29f, #ffa99f);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .ticket {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+    }
+
+    .ticket h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: #2e7d32;
+    }
+
+    .ticket .emoji {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .ticket .field {
+      margin: 8px 0;
+      font-size: 18px;
+    }
+
+    .qr img {
+      margin-top: 20px;
+      width: 150px;
+      height: 150px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
   </style>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDx6oy7trfWsnXaVZ-Gqg1zznA_yBZ5oLE",
-      authDomain: "zoo-management-eco-gaurdians.firebaseapp.com",
+      authDomain: "zoo-management-eco-gaurdians.firebaseapp.comm",
       projectId: "zoo-management-eco-gaurdians"
     };
 
@@ -24,36 +75,48 @@
 
     const params = new URLSearchParams(window.location.search);
     const ticketId = params.get("ticketId");
+    const ticketDiv = document.getElementById("ticket");
 
-    async function showTicket() {
-      const div = document.getElementById("ticket");
+    async function loadTicket() {
       if (!ticketId) {
-        div.innerHTML = "<p class='error'>❌ No ticketId in URL</p>";
+        ticketDiv.innerHTML = `<p class='error'>❌ No ticket ID provided.</p>`;
         return;
       }
-      const snap = await getDoc(doc(db, "tickets", ticketId));
-      if (!snap.exists()) {
-        div.innerHTML = "<p class='error'>❌ Ticket not found</p>";
+
+      const docRef = doc(db, "tickets", ticketId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        ticketDiv.innerHTML = `<p class='error'>❌ Ticket not found.</p>`;
         return;
       }
-      const data = snap.data();
-      div.innerHTML = `
-        <h2>🎟️ Zoo Ticket</h2>
-        <p><strong>ID:</strong> ${ticketId}</p>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Date:</strong> ${data.date}</p>
-        <p><strong>Visitors:</strong> ${data.visitors}</p>
-        <p><strong>Status:</strong> ${data.status}</p>
+
+      const data = docSnap.data();
+      const animalEmojis = ["🦁", "🐯", "🐵", "🦓", "🦒", "🐘", "🦜", "🦩"];
+      const randomAnimal = animalEmojis[Math.floor(Math.random() * animalEmojis.length)];
+
+      ticketDiv.innerHTML = `
+        <div class="emoji">${randomAnimal}</div>
+        <h1>Zoo Entry Ticket</h1>
+        <div class="field"><strong>🎫 Ticket ID:</strong> ${ticketId}</div>
+        <div class="field"><strong>👤 Name:</strong> ${data.visitorName}</div>
+        <div class="field"><strong>📅 Date:</strong> ${data.visitDate}</div>
+        <div class="field"><strong>👥 Visitors:</strong> ${data.quantity}</div>
+        <div class="field"><strong>📌 package:</strong> ${data.package}</div>
+
         <div class="qr">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?data=${location.href}&size=150x150" />
+          <img src="https://api.qrserver.com/v1/create-qr-code/?data=${window.location.href}&size=150x150" alt="QR Code">
         </div>
+        <div class="footer">Show this ticket at the entrance 🐾</div>
       `;
     }
 
-    window.onload = showTicket;
+    window.onload = loadTicket;
   </script>
 </head>
 <body>
-  <div class="ticket" id="ticket">Loading ticket...</div>
+  <div class="ticket" id="ticket">
+    <p>Loading your zoo ticket... 🦓</p>
+  </div>
 </body>
 </html>
